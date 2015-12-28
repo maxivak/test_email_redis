@@ -60,9 +60,12 @@ module TestEmailRedis
       v = nil
       begin
         timeout 10 do
-          v = $redis.rpop key
+          while 1==1 do
+            v = $redis.rpop key
+            break unless v.nil?
 
-          sleep 1
+            sleep 1
+          end
         end
       rescue => e
 
@@ -84,11 +87,11 @@ module TestEmailRedis
     ### settings
 
     def self.redis_key_emails_content
-      config_hash[:redis_prefix]+":emails:content"
+      config[:redis_prefix]+":emails:content"
     end
 
     def self.redis_key_emails_for_email_base
-      config_hash[:redis_prefix]+":emails:by_to_email:"
+      config[:redis_prefix]+":emails:by_to_email:"
     end
 
     def self.redis_key_emails_for_email(to_email)

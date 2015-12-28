@@ -1,4 +1,9 @@
+require 'test_email_redis/helpers'
+
 module TestEmailRedis
+  #extend ActiveSupport::Autoload
+
+  #
   @@config = {}
 
   def self.set_config(_config)
