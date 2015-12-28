@@ -8,8 +8,8 @@ Gem::Specification.new do |s|
   s.name        = "test_email_redis"
   s.version     = TestEmailRedis::VERSION
   s.authors     = ["Max Ivak"]
-  s.email       = ["max.ivak@galacticexchange.io"]
-  s.homepage    = "http://maxivak.com"
+  s.email       = ["maxivak@gmail.com"]
+  s.homepage    = "https://github.com/maxivak/test_email_redis"
   s.summary     = "Test emails using Redis"
   s.description = "Testing emails."
   s.license     = "MIT"
