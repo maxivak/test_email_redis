@@ -82,7 +82,7 @@ module TestEmailRedis
 
       #
       timeout_secs = opts[:timeout] || 60
-      n0 = opts[:n_old_emails] || $redis.llen(key)
+      n0 = opts[:n_old_emails] || 0
 
       #
       ok = false
