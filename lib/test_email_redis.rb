@@ -19,4 +19,8 @@ module TestEmailRedis
     @@config
   end
 
+
+  def self.field_user_id
+    config[:field_user_id] || :to
+  end
 end

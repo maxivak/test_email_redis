@@ -23,13 +23,13 @@ module TestEmailRedis
 
 
       # by to_email
-      $redis.rpush redis_key_emails_for_email(to_email), uid
+      $redis.rpush redis_key_emails_for_user(to_email), uid
 
     end
 
 
-    def self.clean_emails_for_email(to_email)
-      $redis.del redis_key_emails_for_email(to_email)
+    def self.clean_emails_for_user(to_email)
+      $redis.del redis_key_emails_for_user(to_email)
     end
 
     def self.clean_emails_all
@@ -54,8 +54,8 @@ module TestEmailRedis
       data
     end
 
-    def self.wait_for_new_email_to_email(to_email, opts={})
-      key = redis_key_emails_for_email(to_email)
+    def self.wait_for_new_email_for_user(user_id, opts={})
+      key = redis_key_emails_for_user(user_id)
 
       #
       timeout_secs = opts[:timeout] || 60
@@ -83,31 +83,25 @@ module TestEmailRedis
       ok
     end
 
-    def self.n_emails_to_email(email)
-      $redis.llen redis_key_emails_for_email(email)
+    def self.n_emails_for_user(user_id)
+      $redis.llen redis_key_emails_for_user(user_id)
     end
 
-    def self.get_last_email_to_email(to_email, wait=true, opts={})
+    def self.get_last_email_for_user(user_id, wait=true, opts={})
       timeout_secs = opts[:timeout] || 60
 
-      #
-      key = redis_key_emails_for_email(to_email)
-
-      v = nil
-      begin
-        timeout timeout_secs do
-          while 1==1 do
-            v = $redis.rpop key
-            break unless v.nil?
-
-            sleep 1
-          end
-        end
-      rescue => e
-
+      # wait if needed
+      ok_wait = true
+      if wait
+        ok_wait = wait_for_new_email_for_user user_id, opts
       end
 
-      return nil if v.nil?
+      # no email received
+      return nil unless ok_wait
+
+      #
+      key = redis_key_emails_for_user(user_id)
+      v = $redis.rpop key
 
       # push element back to the list
       $redis.rpush key, v
@@ -130,11 +124,11 @@ module TestEmailRedis
     end
 
     def self.redis_key_emails_for_email_base
-      config[:redis_prefix]+":emails:by_to_email:"
+      config[:redis_prefix]+":emails:by_user:"
     end
 
-    def self.redis_key_emails_for_email(to_email)
-      redis_key_emails_for_email_base+to_email.to_s
+    def self.redis_key_emails_for_user(user_id)
+      redis_key_emails_for_email_base+user_id.to_s
     end
 
 
