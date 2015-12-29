@@ -127,7 +127,6 @@ end
 ```
 
 
-```
 
 ## Test Helpers
 
@@ -169,7 +168,7 @@ Data stored in Redis:
 ```
 <redis_prefix>:emails:content - hash with email contents: {mail_id: content, ..}
 <redis_prefix>:emails:by_user:<user_id> - list of mail message IDs for the user: [id1, id2, id3,..]
-
+```
 
 ## Examples
 
