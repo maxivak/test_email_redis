@@ -132,11 +132,11 @@ end
 ## Test Helpers
 
 * TestEmailRedis::Helpers.get_last_email_for_user(user_id) - return the last email for user identified by user_id.
-
 ```
 TestEmailRedis::get_last_email_for_user(user_id, wait=true, opts={})
 
 ```
+
 
 Examples:
 
