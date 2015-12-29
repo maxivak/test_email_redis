@@ -154,6 +154,7 @@ mail = TestEmailRedis::Helpers.get_last_email_for_user(user_id, false)
 * TestEmailRedis::clean_emails_for_user - delete all emails for the user
 
 
+* TestEmailRedis::add_email_to_redis(mail) - adds email to Redis
 
 
 
