@@ -126,20 +126,18 @@ end
 
 ```
 
-## Redis
-
-Data stored in Redis:
-
-```
-<redis_prefix>:emails:content - hash with email contents: {mail_id: content, ..}
-<redis_prefix>:emails:by_user:<user_id> - list of mail message IDs for the user: [id1, id2, id3,..]
-
 
 ```
 
 ## Test Helpers
 
 * TestEmailRedis::Helpers.get_last_email_for_user(user_id) - return the last email for user identified by user_id.
+
+```
+TestEmailRedis::get_last_email_for_user(user_id, wait=true, opts={})
+
+```
+
 Examples:
 ```
 # do not wait for message
@@ -161,6 +159,16 @@ mail = TestEmailRedis::Helpers.get_last_email_for_user(user_id, false)
 ## Config options
 
 * field_user_id - field used to identify user by mail message. By default, :to which means what user_id = mail.to
+
+
+## Redis
+
+Data stored in Redis:
+
+```
+<redis_prefix>:emails:content - hash with email contents: {mail_id: content, ..}
+<redis_prefix>:emails:by_user:<user_id> - list of mail message IDs for the user: [id1, id2, id3,..]
+
 
 ## Examples
 
