@@ -13,6 +13,8 @@ module TestEmailRedis
         data[:parts] << {body: m.body.to_s}
       end
 
+      data[:in_reply_to] = mail.in_reply_to
+
       #$redis.rpush key, data.to_json
 
       # generate uid
@@ -31,10 +33,13 @@ module TestEmailRedis
     end
 
     def self.clean_emails_all
-      $redis.ltrim redis_key_emails_content, 0, -1
+      $redis.del redis_key_emails_content
 
       keys = $redis.keys redis_key_emails_for_email_base+'*'
-      $redis.del keys
+      keys.each do |key|
+        $redis.del key
+      end
+
 
 
     end
@@ -49,17 +54,38 @@ module TestEmailRedis
       data
     end
 
-    def self.get_last_email_to_email(to_email, wait=true, timeout_secs = 30, opts={})
-      if opts[:clean] && opts[:clean]==true
-        clean_emails_for_email to_email
+    def self.wait_for_new_email_to_email(to_email, timeout_secs = 60, opts={})
+      key = redis_key_emails_for_email(to_email)
+
+      n0 = opts[:n_old_emails] || $redis.llen(key)
+
+      ok = false
+      n = nil
+      begin
+        timeout timeout_secs do
+          while 1==1 do
+            n = $redis.llen key
+            if n > n0
+              ok = true
+            end
+
+            sleep 1
+          end
+        end
+      rescue => e
+
       end
 
+      ok
+    end
+
+    def self.get_last_email_to_email(to_email, wait=true, timeout_secs = 60, opts={})
       #
       key = redis_key_emails_for_email(to_email)
 
       v = nil
       begin
-        timeout 10 do
+        timeout timeout_secs do
           while 1==1 do
             v = $redis.rpop key
             break unless v.nil?
@@ -72,6 +98,9 @@ module TestEmailRedis
       end
 
       return nil if v.nil?
+
+      # push element back to the list
+      $redis.rpush key, v
 
       # get content
       content = $redis.hget redis_key_emails_content, v

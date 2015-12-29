@@ -13,3 +13,8 @@ gemspec
 # To use a debugger
 # gem 'byebug', group: [:development, :test]
 
+gem 'rails', '4.2.4'
+
+gem 'therubyracer'
+
+gem 'redis'

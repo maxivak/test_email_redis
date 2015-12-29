@@ -1,3 +1,5 @@
+require_relative 'helpers'
+
 module TestEmailRedis
   class TestMailDelivery < ::Mail::SMTP
     #attr_accessor :message
@@ -10,7 +12,7 @@ module TestEmailRedis
 
     def deliver!(mail)
       # save to redis
-      TestEmailRedis::Helpers.add_email_to_redis mail
+      TestEmailRedis::Helpers.add_email_to_redis mail, mail.in_reply_to
 
 
       # SMTP standard

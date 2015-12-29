@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     test_email_redis (0.0.1)
+      mail
       rails (~> 4.2.4)
 
 GEM

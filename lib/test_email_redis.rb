@@ -1,7 +1,11 @@
-require 'test_email_redis/helpers'
+#require 'test_email_redis/helpers'
+#require 'test_email_redis/test_mail_delivery'
 
 module TestEmailRedis
-  #extend ActiveSupport::Autoload
+  if defined? ActiveSupport
+    extend ActiveSupport::Autoload
+  end
+
 
   #
   @@config = {}
