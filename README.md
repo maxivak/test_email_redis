@@ -1,5 +1,6 @@
 # Test emails using Redis
 Simple gem for testing emails using Redis.
+It is ready to test for asynchronous emails (using Sidekiq or Resque gems).
 
 ## Overview
 
@@ -172,7 +173,7 @@ Data stored in Redis:
 
 ## Examples
 
-### Example. Multiple emails in one test example
+### Example. Get last email
 
 ```
 email = 'myuser@gmail.com'
@@ -206,7 +207,29 @@ UsersMailer.welcome(email)
 # wait for a new message
 mail = TestEmailRedis::Helpers.get_last_email_for_user email
 
-# ***WARNING!***
-# Do not use TestEmailRedis::Helpers.get_last_email_for_user(email) - it might return an old email currently available in Redis.
-# It will not work is asynchronous emails are used
+```
+
+
+### Example. Multiple emails in one test example
+
+
+Multiple emails:
+```
+email = 'myuser@gmail.com'
+
+# emails could be already for the user
+n_old = TestEmailRedis::Helpers.n_emails_for_user email
+
+# do smth which might send email
+UsersMailer.welcome(email)
+# so smth else
+# send another email
+UsersMailer.newsletter(email)
+
+# for now, two emails has been sent.
+
+# wait for a second message to arrive
+mail = TestEmailRedis::Helpers.get_last_email_for_user email, true, {n_old_emails: n_old+1}
+
+
 ```
