@@ -4,18 +4,38 @@ module TestEmailRedis
       TestEmailRedis.config
     end
 
-    def self.add_email_to_redis(mail, to_email=nil)
-      to_email ||= mail.to[0]
+
+    def self.get_user_id_from_mail(mail)
+      # save to redis
+      field_to_email = TestEmailRedis.field_user_id
+
+      if field_to_email
+        user_id =mail.send(field_to_email.to_sym)
+      else
+        user_id = mail.to
+
+        if user_id.is_a? Array
+          user_id = user_id[0]
+        end
+      end
+
+      user_id
+    end
+
+
+
+    def self.add_email_to_redis(mail)
+      #
+      user_id = get_user_id_from_mail mail
+
 
       #
-      data = {from: mail.from, to: mail.to, parts: []}
+      data = {from: mail.from, to: mail.to, in_reply_to: mail.in_reply_to, parts: []}
       mail.parts.each do |m|
         data[:parts] << {body: m.body.to_s}
       end
 
-      data[:in_reply_to] = mail.in_reply_to
-
-      #$redis.rpush key, data.to_json
+     #$redis.rpush key, data.to_json
 
       # generate uid
       uid = "#{(Time.now.utc.to_f * 1000.0).to_i.to_s}_#{Gexcore::Common.random_string_digits(2)}"
@@ -23,13 +43,13 @@ module TestEmailRedis
 
 
       # by to_email
-      $redis.rpush redis_key_emails_for_user(to_email), uid
+      $redis.rpush redis_key_emails_for_user(user_id), uid
 
     end
 
 
-    def self.clean_emails_for_user(to_email)
-      $redis.del redis_key_emails_for_user(to_email)
+    def self.clean_emails_for_user(user_id)
+      $redis.del redis_key_emails_for_user(user_id)
     end
 
     def self.clean_emails_all
@@ -46,6 +66,7 @@ module TestEmailRedis
 
 
     ### get emails
+=begin
     def self.get_last_email
       v = $redis.rpop redis_key_emails_content
       return v if v.nil?
@@ -53,6 +74,8 @@ module TestEmailRedis
       data = JSON.parse(v)
       data
     end
+=end
+
 
     def self.wait_for_new_email_for_user(user_id, opts={})
       key = redis_key_emails_for_user(user_id)

@@ -32,26 +32,27 @@ Configure mail delivery:
 Rails.application.configure do
 ...
 
-#
-require 'test_email_redis/test_mail_delivery'
-ActionMailer::Base.add_delivery_method :my_test_delivery, TestEmailRedis::TestMailDelivery
-config.action_mailer.delivery_method = :my_test_delivery
+    #
+    require 'test_email_redis/test_mail_delivery'
+    ActionMailer::Base.add_delivery_method :my_test_delivery, TestEmailRedis::TestMailDelivery
+    config.action_mailer.delivery_method = :my_test_delivery
 
 end
 
 ```
 
-### Tests
+### Tests: RSpec3
 
 Require helpers in your tests and configure
 ```
-# spec_helper.rb
+# spec_helper.rb or rspec_helper.rb
 
 require 'test_email_redis'
 require 'test_email_redis/helpers'
 
 TestEmailRedis.set_config({
-  redis_prefix: "myapp_test"
+  redis_prefix: "myapp_test",
+  field_user_id: :to
 })
 
 ```
@@ -136,12 +137,68 @@ Data stored in Redis:
 
 ```
 
-## Helpers
+## Test Helpers
+
+* TestEmailRedis::Helpers.get_last_email_for_user(user_id) - return the last email for user identified by user_id.
+Examples:
+```
+# do not wait for message
+mail = TestEmailRedis::Helpers.get_last_email_for_user(user_id, false)
+
+
+```
+
+* TestEmailRedis::n_emails_for_user(user_id) - number of emails for user
+* TestEmailRedis::wait_for_new_email_for_user(user_id) - just waits till a new message arrived
+
+* TestEmailRedis::clean_emails_all - delete all emails
+* TestEmailRedis::clean_emails_for_user - delete all emails for the user
+
+
+
+
 
 ## Config options
 
-* field_user_id - field used to identify user by mail message. By default, :to.
+* field_user_id - field used to identify user by mail message. By default, :to which means what user_id = mail.to
 
 ## Examples
 
 ### Example. Multiple emails in one test example
+
+```
+email = 'myuser@gmail.com'
+
+# emails could be already for the user
+n_old = TestEmailRedis::Helpers.n_emails_for_user email
+
+# do smth which might send email
+UsersMailer.welcome(email)
+
+# wait for a new message
+mail = TestEmailRedis::Helpers.get_last_email_for_user email, true, {n_old_emails: n_old}
+
+# ***WARNING!***
+# Do not use TestEmailRedis::Helpers.get_last_email_for_user(email) - it might return an old email currently available in Redis.
+# It will not work is asynchronous emails are used
+
+```
+
+or if you don't need old emails - just delete them before sending a new email:
+
+```
+email = 'myuser@gmail.com'
+
+# emails could be already for the user
+TestEmailRedis::Helpers.clean_emails_for_user email
+
+# do smth which might send email
+UsersMailer.welcome(email)
+
+# wait for a new message
+mail = TestEmailRedis::Helpers.get_last_email_for_user email
+
+# ***WARNING!***
+# Do not use TestEmailRedis::Helpers.get_last_email_for_user(email) - it might return an old email currently available in Redis.
+# It will not work is asynchronous emails are used
+```
