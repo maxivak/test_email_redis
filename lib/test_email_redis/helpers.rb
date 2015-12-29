@@ -54,11 +54,14 @@ module TestEmailRedis
       data
     end
 
-    def self.wait_for_new_email_to_email(to_email, timeout_secs = 60, opts={})
+    def self.wait_for_new_email_to_email(to_email, opts={})
       key = redis_key_emails_for_email(to_email)
 
+      #
+      timeout_secs = opts[:timeout] || 60
       n0 = opts[:n_old_emails] || $redis.llen(key)
 
+      #
       ok = false
       n = nil
       begin
@@ -67,6 +70,7 @@ module TestEmailRedis
             n = $redis.llen key
             if n > n0
               ok = true
+              break
             end
 
             sleep 1
@@ -79,7 +83,13 @@ module TestEmailRedis
       ok
     end
 
-    def self.get_last_email_to_email(to_email, wait=true, timeout_secs = 60, opts={})
+    def self.n_emails_to_email(email)
+      $redis.llen redis_key_emails_for_email(email)
+    end
+
+    def self.get_last_email_to_email(to_email, wait=true, opts={})
+      timeout_secs = opts[:timeout] || 60
+
       #
       key = redis_key_emails_for_email(to_email)
 
